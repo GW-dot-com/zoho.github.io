@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="login.css">
+    <link rel="icon" href="images/favicon.png" type="image/x-icon">
+    <title>Login</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body>
+ <div class="wrapper">
+    <nav class="nav">
+        <div class="nav-logo">
+            <p>GW.</p>
+        </div>
+        <div class="nav-menu" id="navMenu">
+            <ul>
+                <li><a href="login.html" class="link active">Login</a></li>
+                <li><a href="home.html" class="link">Home</a></li>
+             
+            </ul>
+        </div>
+        <div class="nav-button">
+            <button class="btn white-btn" id="loginBtn" onclick="login()">Sign In</button>
+            <button class="btn" id="registerBtn" onclick="register()">Sign Up</button>
+        </div>
+        <div class="nav-menu-btn">
+            <i class="bx bx-menu" onclick="myMenuFunction()"></i>
+        </div>
+    </nav>
+
+<!----------------------------- Form box ----------------------------------->    
+    <div class="form-box">
+        
+        <!------------------- login form -------------------------->
+
+        <div class="login-container" id="login">
+            <div class="top">
+                <header>Login</header>
+            </div>
+            <div class="input-box">
+                <input type="text" id="login-username" class="input-field" placeholder="Username or Email">
+                <i class="bx bx-user"></i>
+            </div>
+            <div class="input-box">
+                <input type="password" id="login-password" class="input-field" placeholder="Password">
+                <i class="bx bx-lock-alt"></i>
+            </div>
+            <div class="input-box">
+                <input type="submit" class="submit" value="Sign In" onclick="handleLogin(event)">
+            </div>
+            <div class="two-col">
+                <div class="two">
+                </div>
+            </div>
+        </div>
+
+        <!------------------- registration form -------------------------->
+        <div class="register-container" id="register">
+            <div class="top">
+                <header>Sign Up</header>
+            </div>
+            <div class="two-forms">
+                <div class="input-box">
+                    <input type="text" id="register-firstname" class="input-field" placeholder="Firstname">
+                    <i class="bx bx-user"></i>
+                </div>
+                <div class="input-box">
+                    <input type="text" id="register-lastname" class="input-field" placeholder="Lastname">
+                    <i class="bx bx-user"></i>
+                </div>
+            </div>
+            <div class="input-box">
+                <input type="text" id="register-email" class="input-field" placeholder="Email">
+                <i class="bx bx-envelope"></i>
+            </div>
+            <div class="input-box">
+                <input type="password" id="register-password" class="input-field" placeholder="Password">
+                <i class="bx bx-lock-alt"></i>
+            </div>
+            <div class="input-box">
+                <input type="submit" class="submit" value="Register" onclick="handleRegister(event)">
+            </div>
+            <div class="two-col">
+                <div class="two">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>   
+
+<script>
+    function myMenuFunction() {
+        var i = document.getElementById("navMenu");
+        if(i.className === "nav-menu") {
+            i.className += " responsive";
+        } else {
+            i.className = "nav-menu";
+        }
+    }
+
+    var a = document.getElementById("loginBtn");
+    var b = document.getElementById("registerBtn");
+    var x = document.getElementById("login");
+    var y = document.getElementById("register");
+
+    function login() {
+        x.style.left = "4px";
+        y.style.right = "-520px";
+        a.className += " white-btn";
+        b.className = "btn";
+        x.style.opacity = 1;
+        y.style.opacity = 0;
+    }
+
+    function register() {
+        x.style.left = "-510px";
+        y.style.right = "5px";
+        a.className = "btn";
+        b.className += " white-btn";
+        x.style.opacity = 0;
+        y.style.opacity = 1;
+    }
+
+    const secretKey = 'U2FsdGVkX18AL5KojdHISnngKZfzqe2RYfGxUHFOX0M=';  // Use a strong secret key
+
+    async function handleLogin(event) {
+        event.preventDefault();
+        const username = document.getElementById('login-username').value;
+        const password = document.getElementById('login-password').value;
+
+        const response = await fetch('https://sheetdb.io/api/v1/hu76giz3maoa2', {
+            method: 'GET'
+        });
+
+        const data = await response.json();
+
+        const user = data.find(user => {
+            const decryptedEmail = CryptoJS.AES.decrypt(user.email, secretKey).toString(CryptoJS.enc.Utf8);
+            const decryptedPassword = CryptoJS.AES.decrypt(user.password, secretKey).toString(CryptoJS.enc.Utf8);
+            return (decryptedEmail === username || user.username === username) && decryptedPassword === password;
+        });
+
+        if (user) {
+            alert('Login successful');
+            // Handle successful login
+        } else {
+            alert('Invalid username or password');
+        }
+    }
+
+    async function handleRegister(event) {
+        event.preventDefault();
+        const firstname = document.getElementById('register-firstname').value;
+        const lastname = document.getElementById('register-lastname').value;
+        const email = document.getElementById('register-email').value;
+        const password = document.getElementById('register-password').value;
+
+        const response = await fetch('https://sheetdb.io/api/v1/hu76giz3maoa2', {
+            method: 'GET'
+        });
+
+        const data = await response.json();
+
+        const emailExists = data.some(user => {
+            const decryptedEmail = CryptoJS.AES.decrypt(user.email, secretKey).toString(CryptoJS.enc.Utf8);
+            return decryptedEmail === email;
+        });
+
+        if (emailExists) {
+            alert('Email is already in use');
+            return;
+        }
+
+        const encryptedFirstname = CryptoJS.AES.encrypt(firstname, secretKey).toString();
+        const encryptedLastname = CryptoJS.AES.encrypt(lastname, secretKey).toString();
+        const encryptedEmail = CryptoJS.AES.encrypt(email, secretKey).toString();
+        const encryptedPassword = CryptoJS.AES.encrypt(password, secretKey).toString();
+
+        const postResponse = await fetch('https://sheetdb.io/api/v1/hu76giz3maoa2', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                data: {
+                    firstname: encryptedFirstname,
+                    lastname: encryptedLastname,
+                    email: encryptedEmail,
+                    password: encryptedPassword
+                }
+            })
+        });
+
+        if (postResponse.ok) {
+            alert('Registration successful');
+            // Handle successful registration
+        } else {
+            alert('Registration failed');
+        }
+    }
+
+    // Add visibility change event listener
+    var originalTitle = document.title;
+    var hiddenTitle = "Come Back!🥲";
+
+    function handleVisibilityChange() {
+        if (document.hidden) {
+            document.title = hiddenTitle;
+        } else {
+            document.title = originalTitle;
+        }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+</script>
+
+</body>
+</html>
